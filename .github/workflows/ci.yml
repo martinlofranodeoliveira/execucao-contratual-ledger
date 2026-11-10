@@ -1,0 +1,16 @@
+name: Native SDK HTTP and CLI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  native-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Genuine package, isolated SDK and cold installed HTTP CLI consumer
+        run: sh scripts/check.sh

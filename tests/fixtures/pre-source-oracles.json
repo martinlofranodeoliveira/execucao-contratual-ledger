@@ -1,0 +1,253 @@
+{
+  "status": "INDEPENDENT_PRE_SOURCE_ORACLE_NOT_PRODUCT",
+  "reference_sha256": "1634aab8bbb87a1c15ff36d61cfd7e4023d2c585b5ee623a9fca7b806dbe4de0",
+  "scenarios": {
+    "partial_and_reversal": {
+      "unit": "un",
+      "scale": 1,
+      "events": [
+        {
+          "kind": "CONTRACT_CREATED",
+          "version": 1,
+          "deltas": {
+            "i": {
+              "authorized": 100
+            }
+          }
+        },
+        {
+          "kind": "MEASUREMENT_DRAFTED",
+          "version": 2,
+          "deltas": {}
+        },
+        {
+          "kind": "MEASUREMENT_SUBMITTED",
+          "version": 3,
+          "deltas": {
+            "i": {
+              "reserved": 70
+            }
+          }
+        },
+        {
+          "kind": "PARTIAL_RECEIPT",
+          "version": 4,
+          "deltas": {
+            "i": {
+              "reserved": -70,
+              "received": 60
+            }
+          }
+        },
+        {
+          "kind": "RECEIPT_REVERSED",
+          "version": 5,
+          "deltas": {
+            "i": {
+              "received": -60
+            }
+          }
+        },
+        {
+          "kind": "CONTRACT_AMENDED",
+          "version": 6,
+          "deltas": {
+            "i": {
+              "authorized": -50
+            }
+          }
+        }
+      ],
+      "expected_prefix_balances": [
+        {
+          "i": {
+            "authorized": 100,
+            "reserved": 0,
+            "received": 0,
+            "available": 100
+          }
+        },
+        {
+          "i": {
+            "authorized": 100,
+            "reserved": 0,
+            "received": 0,
+            "available": 100
+          }
+        },
+        {
+          "i": {
+            "authorized": 100,
+            "reserved": 70,
+            "received": 0,
+            "available": 30
+          }
+        },
+        {
+          "i": {
+            "authorized": 100,
+            "reserved": 0,
+            "received": 60,
+            "available": 40
+          }
+        },
+        {
+          "i": {
+            "authorized": 100,
+            "reserved": 0,
+            "received": 0,
+            "available": 100
+          }
+        },
+        {
+          "i": {
+            "authorized": 50,
+            "reserved": 0,
+            "received": 0,
+            "available": 50
+          }
+        }
+      ]
+    },
+    "return_all": {
+      "events": [
+        {
+          "kind": "CONTRACT_CREATED",
+          "deltas": {
+            "i": {
+              "authorized": 100
+            }
+          }
+        },
+        {
+          "kind": "SUBMIT",
+          "deltas": {
+            "i": {
+              "reserved": 70
+            }
+          }
+        },
+        {
+          "kind": "RETURN",
+          "deltas": {
+            "i": {
+              "reserved": -70
+            }
+          }
+        }
+      ],
+      "expected_final": {
+        "i": {
+          "authorized": 100,
+          "reserved": 0,
+          "received": 0,
+          "available": 100
+        }
+      }
+    },
+    "amendment_floor": {
+      "before": {
+        "authorized": 100,
+        "reserved": 20,
+        "received": 60
+      },
+      "reject_limit": 79,
+      "accept_limit": 80,
+      "expected_after_accepted": {
+        "authorized": 80,
+        "reserved": 20,
+        "received": 60,
+        "available": 0
+      }
+    },
+    "two_item_rollback": {
+      "before": {
+        "a": {
+          "authorized": 100,
+          "reserved": 0,
+          "received": 0
+        },
+        "b": {
+          "authorized": 50,
+          "reserved": 0,
+          "received": 0
+        }
+      },
+      "request": {
+        "a": 70,
+        "b": 70
+      },
+      "expected": "INSUFFICIENT_BALANCE",
+      "expected_after": "byte-equal business snapshot, no version/event/op receipt inserted"
+    },
+    "concurrent_same_version": {
+      "before": {
+        "authorized": 100,
+        "reserved": 0,
+        "received": 0,
+        "version": 1
+      },
+      "requests": [
+        {
+          "op_id": "one",
+          "expected_version": 1,
+          "quantity": 70
+        },
+        {
+          "op_id": "two",
+          "expected_version": 1,
+          "quantity": 70
+        }
+      ],
+      "expected_multiset": [
+        "ONE_COMMITTED",
+        "ONE_STALE_VERSION"
+      ],
+      "expected_after": {
+        "authorized": 100,
+        "reserved": 70,
+        "received": 0,
+        "available": 30,
+        "version": 2
+      },
+      "winner_identity": "not specified; no sleep/order oracle"
+    },
+    "idempotent_race": {
+      "same_op_same_normalized_payload": true,
+      "expected_effects": 1,
+      "expected_receipts": 1,
+      "expected_return_modes": [
+        "committed",
+        "replayed"
+      ],
+      "same_op_changed_content": "IDEMPOTENCY_CONFLICT; no extra effect"
+    },
+    "authority": {
+      "principal": "host-authenticated SDK identity; role/membership from stored immutable bootstrap policy",
+      "unrelated_contract": "NOT_FOUND before any cached receipt",
+      "wrong_role": "FORBIDDEN/ROLE_FORBIDDEN",
+      "receiver_same_submitter": "FORBIDDEN/SELF_REVIEW_FORBIDDEN",
+      "request_JSON_actor_or_roles": "rejected by HTTP schema, never authority",
+      "denial_effects": "no event/op/version/balance change"
+    },
+    "reconciliation": {
+      "COMMIT_raises_in_transaction_and_confirmed_rollback": "STORAGE_ERROR; no effect",
+      "COMMIT_ack_uncertain_or_rollback_unconfirmed": "COMMIT_UNCERTAIN; close unusable handle; reconcile exact op_id on new connection, no invented rollback",
+      "retry_after_lost_committed_ack": "same original frozen receipt, replayed=True, no extra event"
+    },
+    "revision_rules": {
+      "draft_revise": "append immutable revision; no balance change",
+      "returned_revise": "append newDRAFT; original submitted/returned facts retained",
+      "submitted_or_accepted_revise": "STATE_CONFLICT",
+      "accepted_partial": "terminal except explicit full receipt reversal",
+      "reversed": "terminal, no automatic re-reservation"
+    }
+  },
+  "exhaustive_small_balance_corpus": {
+    "accepted_delta_sequences": 196,
+    "sha256": "c625811e2f21b2d9725c3bc0280177199b03542ea9bf7cdc21fea804b8608772",
+    "amendment_admission_cases": 336,
+    "amendment_digest": "e40473e90548be4a4fcf4f3e03dad498b530238608a5e822993755b12034280f"
+  },
+  "scope": "Signed delta sums and exact hardcoded state/permission/concurrency expectations; no SQLite/domain code imported. No claim of a running application."
+}

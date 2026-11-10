@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools==84.2.1", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "execucao-contratual-ledger"
+version = "0.1.0"
+description = "Bounded synthetic contract execution quantities, immutable decisions and SQLite transactions"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.scripts]
+execucao-contratual-ledger = "execucao_contratual_ledger.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

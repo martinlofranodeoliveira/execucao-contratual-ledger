@@ -1,0 +1,3 @@
+FROM python@sha256:281d39ff02e3b389401586134ff9e6572954687822a58055ec07a60ded4e0b7f
+COPY requirements-build.lock /opt/requirements-build.lock
+RUN python -I -m pip --isolated --disable-pip-version-check download --no-cache-dir --only-binary=:all: --require-hashes --index-url https://pypi.org/simple -r /opt/requirements-build.lock --dest /opt/wheelhouse

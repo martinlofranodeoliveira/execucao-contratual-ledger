@@ -1,0 +1,10 @@
+FROM python@sha256:281d39ff02e3b389401586134ff9e6572954687822a58055ec07a60ded4e0b7f AS install
+COPY distributions/ /opt/distributions/
+RUN python -m venv --without-pip /opt/runtime && python -I -m pip --isolated --python /opt/runtime/bin/python --disable-pip-version-check install --no-index --no-deps --no-compile /opt/distributions/*.whl
+FROM python@sha256:281d39ff02e3b389401586134ff9e6572954687822a58055ec07a60ded4e0b7f
+COPY --from=install /opt/runtime/ /opt/runtime/
+COPY --chown=1000:1000 consumer.py package-check.json /consumer/
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1
+WORKDIR /consumer
+USER 1000:1000
+ENTRYPOINT ["/opt/runtime/bin/python","-I","-B","/consumer/consumer.py"]

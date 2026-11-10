@@ -1,0 +1,410 @@
+{
+  "status": "LITERAL_INDEPENDENT_PRE_SOURCE_ADMISSION_EXPECTATIONS_NOT_EXECUTED_APPLICATION_TESTS",
+  "contract_basis": [
+    "CONTRACT.proposed.md",
+    "API-clarifications.proposed.md"
+  ],
+  "cases": [
+    {
+      "id": "quantity_bool",
+      "input_context": {
+        "ticks": true
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "quantity_float",
+      "input_context": {
+        "ticks": 1.0
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "quantity_numeric_text",
+      "input_context": {
+        "ticks": "7"
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "quantity_negative",
+      "input_context": {
+        "ticks": -1
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "quantity_above_cap",
+      "input_context": {
+        "ticks": 1000000000001
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "duplicate_line_ids",
+      "input_context": {
+        "lines": [
+          [
+            "i",
+            1
+          ],
+          [
+            "i",
+            2
+          ]
+        ]
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "empty_items",
+      "input_context": {
+        "items": []
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "empty_draft_lines",
+      "input_context": {
+        "lines": []
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "empty_actor_roles",
+      "input_context": {
+        "roles": []
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "zero_events_valid_policy",
+      "input_context": {
+        "limits": {
+          "max_events": 0
+        },
+        "attempt": "first contract creation"
+      },
+      "expected": "LIMIT_EXCEEDED"
+    },
+    {
+      "id": "actor_cap0_nonempty_valid_bootstrap",
+      "input_context": {
+        "max_actors": 0,
+        "actors": [
+          "manager"
+        ]
+      },
+      "expected": "LIMIT_EXCEEDED"
+    },
+    {
+      "id": "empty_bootstrap",
+      "input_context": {
+        "actors": []
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "no_manager_bootstrap",
+      "input_context": {
+        "actors": [
+          "submitter"
+        ]
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "zero_initial_authorized",
+      "input_context": {
+        "authorized_ticks": 0
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "zero_accepted",
+      "input_context": {
+        "submitted": 70,
+        "accepted_lines": [
+          [
+            "i",
+            0
+          ]
+        ]
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "missing_explicit_accepted_item",
+      "input_context": {
+        "submitted_items": [
+          "i",
+          "j"
+        ],
+        "accepted_lines": [
+          [
+            "i",
+            1
+          ]
+        ]
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "accepted_above_submitted",
+      "input_context": {
+        "submitted": 70,
+        "accepted": 71
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "partial_missing_reason",
+      "input_context": {
+        "submitted": 70,
+        "accepted": 60,
+        "reason": null
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "reason_blank",
+      "input_context": {
+        "reason": "  "
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "reason_control",
+      "input_context": {
+        "reason": "bad\u007f"
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "expected_version_bool",
+      "input_context": {
+        "expected_version": false
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "expected_version_above_cap",
+      "input_context": {
+        "expected_version": 4097
+      },
+      "expected": "INVALID_INPUT"
+    },
+    {
+      "id": "closed_owner_malformed",
+      "input_context": {
+        "handle": "closed",
+        "thread": "owner",
+        "ticks": "bad"
+      },
+      "expected": "CLOSED"
+    },
+    {
+      "id": "closed_wrong_thread_malformed",
+      "input_context": {
+        "handle": "closed",
+        "thread": "other",
+        "ticks": "bad"
+      },
+      "expected": "WRONG_THREAD"
+    },
+    {
+      "id": "wrong_role_before_replay",
+      "input_context": {
+        "actor": "aud",
+        "action": "amend",
+        "known_op": true
+      },
+      "expected": "FORBIDDEN"
+    },
+    {
+      "id": "outside_scope_before_replay",
+      "input_context": {
+        "actor": "other",
+        "known_contract": "c",
+        "known_op": true
+      },
+      "expected": "NOT_FOUND"
+    },
+    {
+      "id": "self_review_before_write",
+      "input_context": {
+        "owner": "dual",
+        "receiver": "dual"
+      },
+      "expected": "SELF_REVIEW_FORBIDDEN"
+    },
+    {
+      "id": "manager_original_receiver_reversal",
+      "input_context": {
+        "manager": "dual_manager",
+        "receipt_receiver": "dual_manager"
+      },
+      "expected": "SELF_REVIEW_FORBIDDEN"
+    },
+    {
+      "id": "stale_before_insufficiency",
+      "input_context": {
+        "expected": 2,
+        "current": 3,
+        "requested": 101,
+        "authorized": 100
+      },
+      "expected": "STALE_VERSION"
+    },
+    {
+      "id": "new_op_duplicate_measurement_after_cas",
+      "input_context": {
+        "expected_matches": true,
+        "measurement_exists": true
+      },
+      "expected": "ALREADY_EXISTS"
+    },
+    {
+      "id": "new_op_terminal_submit",
+      "input_context": {
+        "state": "ACCEPTED_PARTIAL",
+        "expected_matches": true
+      },
+      "expected": "STATE_CONFLICT"
+    },
+    {
+      "id": "exact_replay_after_progression",
+      "input_context": {
+        "request": "original submit version2",
+        "current_version": 4
+      },
+      "expected": "ORIGINAL_RECEIPT_VERSION3_REPLAYED_TRUE"
+    },
+    {
+      "id": "changed_precondition_same_operation",
+      "input_context": {
+        "original_expected": 2,
+        "retry_expected": 4
+      },
+      "expected": "IDEMPOTENCY_CONFLICT"
+    },
+    {
+      "id": "amend_floor",
+      "input_context": {
+        "received": 60,
+        "reserved": 20,
+        "new_authorized": 79
+      },
+      "expected": "AMENDMENT_FLOOR"
+    },
+    {
+      "id": "reverse_twice_new_operation",
+      "input_context": {
+        "state": "REVERSED",
+        "operation": "new"
+      },
+      "expected": "ALREADY_REVERSED"
+    },
+    {
+      "id": "raw_read_exact_cap",
+      "input_context": {
+        "materialized_bytes": 1048576
+      },
+      "expected": "WITHIN_READ_BYTE_CAP"
+    },
+    {
+      "id": "raw_read_over_cap",
+      "input_context": {
+        "materialized_bytes": 1048577
+      },
+      "expected": "LIMIT_EXCEEDED"
+    },
+    {
+      "id": "literal_role_union",
+      "input_context": {
+        "roles": [
+          "AUDITOR",
+          "MANAGER"
+        ],
+        "action": "amend",
+        "other_preconditions_valid": true
+      },
+      "expected": "COMMITTED"
+    },
+    {
+      "id": "begin_busy",
+      "input_context": {
+        "owned_write_lock_held": true,
+        "lock_timeout_expired": true
+      },
+      "expected": "BUSY_NO_EFFECT"
+    }
+  ],
+  "pagination": [
+    {
+      "current": 4,
+      "after": 0,
+      "through": 4,
+      "limit": 2,
+      "versions": [
+        1,
+        2
+      ],
+      "next_after": 2,
+      "complete": false
+    },
+    {
+      "current": 5,
+      "after": 2,
+      "through": 4,
+      "limit": 2,
+      "versions": [
+        3,
+        4
+      ],
+      "next_after": 4,
+      "complete": true
+    },
+    {
+      "current": 4,
+      "after": 0,
+      "through": 0,
+      "limit": 1,
+      "versions": [],
+      "next_after": 0,
+      "complete": true
+    },
+    {
+      "current": 4,
+      "after": 4,
+      "through": 4,
+      "limit": 100,
+      "versions": [],
+      "next_after": 4,
+      "complete": true
+    },
+    {
+      "current": 4,
+      "after": 3,
+      "through": 2,
+      "limit": 2,
+      "error": "INVALID_INPUT"
+    },
+    {
+      "current": 4,
+      "after": 0,
+      "through": 5,
+      "limit": 2,
+      "error": "INVALID_INPUT"
+    },
+    {
+      "current": 4,
+      "after": 0,
+      "through": 4,
+      "limit": true,
+      "error": "INVALID_INPUT"
+    }
+  ],
+  "effect_rule": "Every refusal before commit changes no retained business fact/version/event/operation receipt; storage failures require actual rollback/non-dispatch proof. Accepted named shape cases do not imply all other preconditions are valid.",
+  "scope": "Frozen expected literals to guide independent support tests after product exists. No implementation imported."
+}

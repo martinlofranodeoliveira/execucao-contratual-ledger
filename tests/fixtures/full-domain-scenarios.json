@@ -1,0 +1,322 @@
+{
+  "status": "ADDITIONAL_FULL_DOMAIN_SCENARIOS_PRE_SOURCE_NOT_SDK_EXECUTION",
+  "primitive_v1_oracles_preserved": {
+    "path": "pre-source-oracles.json",
+    "sha256": "bd95cd6aa200acec980205fe0195ec118514cd0a315e05525558e7abc84df51f",
+    "note": "Its concurrency balance version1 is a primitive CAS state. Complete SDK setup below creates both DRAFTs first and uses aggregate_version3; no hidden impossible domain setup is required."
+  },
+  "actors": [
+    {
+      "id": "mgr",
+      "roles": [
+        "MANAGER"
+      ]
+    },
+    {
+      "id": "req",
+      "roles": [
+        "SUBMITTER"
+      ]
+    },
+    {
+      "id": "recv",
+      "roles": [
+        "RECEIVER"
+      ]
+    },
+    {
+      "id": "aud",
+      "roles": [
+        "AUDITOR"
+      ]
+    },
+    {
+      "id": "dual",
+      "roles": [
+        "SUBMITTER",
+        "RECEIVER"
+      ]
+    },
+    {
+      "id": "other",
+      "roles": [
+        "SUBMITTER"
+      ]
+    }
+  ],
+  "contract": {
+    "id": "c",
+    "items": [
+      {
+        "item_id": "i",
+        "unit": "un",
+        "scale": 1,
+        "authorized_ticks": 100
+      }
+    ],
+    "members": [
+      "mgr",
+      "req",
+      "recv",
+      "aud",
+      "dual"
+    ]
+  },
+  "partial_reversal_trace": [
+    {
+      "command": "create_contract",
+      "actor": "mgr",
+      "op": "c0",
+      "expected_version": 0,
+      "committed_version": 1,
+      "balance": [
+        100,
+        0,
+        0,
+        100
+      ]
+    },
+    {
+      "command": "create_measurement",
+      "actor": "req",
+      "measurement": "m1",
+      "lines": [
+        [
+          "i",
+          70
+        ]
+      ],
+      "op": "d1",
+      "expected_version": 1,
+      "committed_version": 2,
+      "measurement_revision": 1,
+      "state": "DRAFT",
+      "balance": [
+        100,
+        0,
+        0,
+        100
+      ]
+    },
+    {
+      "command": "submit_measurement",
+      "actor": "req",
+      "measurement": "m1",
+      "op": "s1",
+      "expected_version": 2,
+      "committed_version": 3,
+      "state": "SUBMITTED",
+      "balance": [
+        100,
+        70,
+        0,
+        30
+      ]
+    },
+    {
+      "command": "receive_measurement",
+      "actor": "recv",
+      "measurement": "m1",
+      "accepted_lines": [
+        [
+          "i",
+          60
+        ]
+      ],
+      "reason": "Synthetic ten units returned",
+      "op": "r1",
+      "expected_version": 3,
+      "committed_version": 4,
+      "state": "ACCEPTED_PARTIAL",
+      "balance": [
+        100,
+        0,
+        60,
+        40
+      ]
+    },
+    {
+      "command": "reverse_receipt",
+      "actor": "mgr",
+      "measurement": "m1",
+      "reason": "Synthetic correction",
+      "op": "v1",
+      "expected_version": 4,
+      "committed_version": 5,
+      "state": "REVERSED",
+      "balance": [
+        100,
+        0,
+        0,
+        100
+      ]
+    },
+    {
+      "command": "amend_contract",
+      "actor": "mgr",
+      "new_limits": [
+        [
+          "i",
+          50
+        ]
+      ],
+      "reason": "Synthetic new limit",
+      "op": "a1",
+      "expected_version": 5,
+      "committed_version": 6,
+      "contract_revision": 2,
+      "balance": [
+        50,
+        0,
+        0,
+        50
+      ]
+    }
+  ],
+  "returned_revision_trace": [
+    {
+      "command": "create_contract",
+      "committed_version": 1
+    },
+    {
+      "command": "create_measurement",
+      "measurement": "m1",
+      "ticks": 70,
+      "committed_version": 2,
+      "measurement_revision": 1
+    },
+    {
+      "command": "revise_measurement",
+      "ticks": 60,
+      "committed_version": 3,
+      "measurement_revision": 2,
+      "reserved": 0
+    },
+    {
+      "command": "submit_measurement",
+      "committed_version": 4,
+      "reserved": 60
+    },
+    {
+      "command": "revise_measurement",
+      "expected_version": 4,
+      "expected_error": "STATE_CONFLICT",
+      "version_stays": 4
+    },
+    {
+      "command": "return_measurement",
+      "reason": "Synthetic return",
+      "committed_version": 5,
+      "reserved": 0,
+      "received": 0,
+      "state": "RETURNED"
+    },
+    {
+      "command": "revise_measurement",
+      "ticks": 55,
+      "committed_version": 6,
+      "measurement_revision": 3,
+      "state": "DRAFT",
+      "reserved": 0
+    }
+  ],
+  "concurrent_submit_full_setup": {
+    "sequential_setup": [
+      "create_contract ->v1",
+      "create_draft m1/70 ->v2",
+      "create_draft m2/70 ->v3"
+    ],
+    "simultaneous": [
+      {
+        "measurement": "m1",
+        "op": "s1",
+        "expected_version": 3
+      },
+      {
+        "measurement": "m2",
+        "op": "s2",
+        "expected_version": 3
+      }
+    ],
+    "expected_codes_multiset": [
+      "COMMITTED",
+      "STALE_VERSION"
+    ],
+    "expected_committed_version": 4,
+    "expected_balance": [
+      100,
+      70,
+      0,
+      30
+    ],
+    "submitted_measurements": 1,
+    "other_measurement_state": "DRAFT",
+    "order_or_winner_identity": "unspecified"
+  },
+  "replay_after_later_receipt": {
+    "setup": "partial_reversal_trace through r1/v4",
+    "retry": "original s1 command EXACT actor/body/expected_version2",
+    "expected_original_receipt_version": 3,
+    "expected_original_receipt_balance": [
+      100,
+      70,
+      0,
+      30
+    ],
+    "replayed": true,
+    "current_store_version_stays": 4,
+    "current_store_balance": [
+      100,
+      0,
+      60,
+      40
+    ],
+    "changed_expected_version_same_op": "IDEMPOTENCY_CONFLICT",
+    "new_op_same_submit": "STATE_CONFLICT",
+    "authorization_first": "other actor or revoked/invalid HTTP token never receives cached receipt"
+  },
+  "permissions_no_effect": [
+    {
+      "actor": "dual",
+      "action": "receive own submitted m_dual",
+      "error": "SELF_REVIEW_FORBIDDEN"
+    },
+    {
+      "actor": "aud",
+      "action": "amend",
+      "error": "FORBIDDEN"
+    },
+    {
+      "actor": "other",
+      "action": "read c or replay c op",
+      "error": "NOT_FOUND"
+    },
+    {
+      "HTTP": "missing/invalid token",
+      "status": 401
+    },
+    {
+      "HTTP": "JSON actor_id/roles override",
+      "status": 400
+    }
+  ],
+  "amendment_with_other_reservation": {
+    "before": [
+      100,
+      20,
+      60,
+      20
+    ],
+    "new_limit79": "AMENDMENT_FLOOR; unchanged state/version/events/operations",
+    "new_limit80": "COMMITTED; balance[80,20,60,0]",
+    "reverse_receipt60_after_amend": "balance[80,20,0,60]; other reservation preserved"
+  },
+  "assertions": [
+    "Every denied/failed command has no new receipt/event/version/business fact.",
+    "Identical retry has exactly one stored operation and one original event.",
+    "Every accepted first command has one aggregate version/event, including numerically unchanged amendments.",
+    "Snapshots/read objects cannot mutate retained/DB state.",
+    "Close/reopen preserves committed state and rolls back uncommitted work.",
+    "Storage constraint/commit errors are not accepted as domain negative tests."
+  ]
+}
